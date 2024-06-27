@@ -22,7 +22,8 @@ Now, install the required libraries (currently, just miniaudio) and build. If
 on Linux or macOS:
 
 ```bash
-make deps
+make deps # Add vendor deps
+make # Build
 ```
 
 If on Windows, run `build.bat`. Make sure `cl.exe` and `curl.exe` are in your path,
