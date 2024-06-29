@@ -1,3 +1,7 @@
 /vendor/
 
 fonograf
+
+*.mp3
+*.wav
+*.flac
