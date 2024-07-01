@@ -1,0 +1,3 @@
+[submodule "vendor/tagparser"]
+	path = vendor/tagparser
+	url = https://github.com/Martchus/tagparser

@@ -1,8 +1,14 @@
+#include <tagparser/tag.h>
+#include <tagparser/tagvalue.h>
 #define MINIAUDIO_IMPLEMENTATION
 #include "vendor/miniaudio.h"
 
 #define BOILER_IMPL
 #include "vendor/boiler.h"
+
+#include <tagparser/diagnostics.h>
+#include <tagparser/mediafileinfo.h>
+#include <tagparser/progressfeedback.h>
 
 #include <iostream>
 #include <sstream>
@@ -70,6 +76,49 @@ void print_header(const char* track) {
     delete[] str;
 }
 
+void print_track_info(const char* track) {
+    auto file_info = TagParser::MediaFileInfo();
+    auto diag = TagParser::Diagnostics();
+
+    // create handle to abort gracefully and get feedback during during long
+    // operations
+    auto progress = TagParser::AbortableProgressFeedback(
+        [](TagParser::AbortableProgressFeedback& feedback) {
+            // callback for status update
+            std::clog << "At step: " << feedback.step() << '\n';
+        },
+        [](TagParser::AbortableProgressFeedback& feedback) {
+            // callback for percentage-only updates
+            std::clog << "Step percentage: " << feedback.stepPercentage()
+                      << '\n';
+        });
+
+    file_info.setPath(std::string_view(track));
+    file_info.open();
+    file_info.parseEverything(diag, progress);
+
+    if (!file_info.tags().empty()) {
+        auto tag = file_info.tags().at(0);
+        auto title = tag->value(TagParser::KnownField::Title)
+                         .toString(TagParser::TagTextEncoding::Utf8);
+        auto artist = tag->value(TagParser::KnownField::Artist)
+                          .toString(TagParser::TagTextEncoding::Utf8);
+
+        GREEN();
+        std::cout << "\n\n";
+        std::cout << "Playing: ";
+        RESET();
+        std::cout << " " << title << "\n"
+                  << "by " << artist << "\n";
+    } else {
+        GREEN();
+        std::cout << "\n\n";
+        std::cout << "Playing: ";
+        RESET();
+        std::cout << track << "\n";
+    }
+}
+
 int main(int argc, char** argv) {
     if (argc != 2) {
         std::cerr << "Usage: fonograf <filename>\n";
@@ -82,6 +131,7 @@ int main(int argc, char** argv) {
 
     clrscr();
     print_header(argv[1]);
+    print_track_info(argv[1]);
 
     while (true) {
         if (__kbhit()) {
@@ -89,6 +139,7 @@ int main(int argc, char** argv) {
 
             clrscr();
             print_header(argv[1]);
+            print_track_info(argv[1]);
             switch (key) {
             case 'q':
                 goto end;

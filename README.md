@@ -3,7 +3,8 @@
 Basic music player in C++.
 
 Uses the [miniaudio](https://github.com/mackron/miniaudio) library for audio
-decoding.
+decoding, and [tagparser](https://github.com/Martchus/tagparser) to, well, parse
+tags.
 
 # building
 
@@ -18,8 +19,8 @@ Clone the repo:
 git clone https://github.com/pes18fan/fonograf.git
 ```
 
-Now, install the required libraries (currently, just miniaudio) and build. If 
-on Linux or macOS:
+Now, install the required libraries (miniaudio, boiler.h and tagparser) and build.
+If on Linux or macOS:
 
 ```bash
 make deps # Add vendor deps
