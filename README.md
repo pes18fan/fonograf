@@ -3,8 +3,7 @@
 Basic music player in C++.
 
 Uses the [miniaudio](https://github.com/mackron/miniaudio) library for audio
-decoding, and [tagparser](https://github.com/Martchus/tagparser) to, well, parse
-tags.
+decoding.
 
 # building
 
@@ -23,7 +22,7 @@ Now, install the required libraries (miniaudio, boiler.h and tagparser) and buil
 If on Linux or macOS:
 
 ```bash
-make deps # Add vendor deps
+make deps # Grab vendor deps
 make # Build
 ```
 
