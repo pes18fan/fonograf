@@ -1,5 +1,5 @@
 all:
-	g++ -o fonograf main.cpp
+	g++ -o fonograf fonograf.cpp
 
 clean:
 	rm -f fonograf
