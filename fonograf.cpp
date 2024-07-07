@@ -1,4 +1,5 @@
 #include "fonograf.h"
+#include "vendor/boiler.h"
 
 #include <fstream>
 #include <iostream>
@@ -41,13 +42,23 @@ void Fonograf::print_ui_header() {
     oss << "Now playing: " << track << "\n";
     center_text(oss.str().c_str());
 
+    std::ostringstream pss;
+    pss << "Duration: " << duration / 60 << " min "
+        << (duration - ((duration / 60) * 60)) << " sec\n";
+    center_text(pss.str().c_str());
+
+    std::ostringstream qss;
+    qss << "Time left: " << remaining_duration / 60 << " min "
+        << (remaining_duration - ((remaining_duration / 60) * 60)) << " sec\n";
+    center_text(qss.str().c_str());
+
     center_text("Press p to pause or play, and q to quit.\n");
 }
 
 /***** PUBLIC *****/
 
 Fonograf::Fonograf(std::string t)
-    : paused(true), decoder_inited(false), device_inited(false) {
+    : paused(false), decoder_inited(false), device_inited(false) {
     std::ifstream ifile;
     ifile.open(t);
     if (!ifile) {
@@ -85,9 +96,14 @@ void Fonograf::play_track() {
         die("Failed to start playback device");
     }
 
-    ma_uint64 duration;
-    ma_decoder_get_length_in_pcm_frames(&decoder, &duration);
-    duration /= decoder.outputSampleRate;
+    result =
+        ma_decoder_get_length_in_pcm_frames(&decoder, &duration_as_pcm_frames);
+    if (result != MA_SUCCESS) {
+        die("Failed to get duration of track");
+    }
+
+    duration = duration_as_pcm_frames / decoder.outputSampleRate;
+    remaining_duration = duration;
 }
 
 int Fonograf::render_ui() {
@@ -95,6 +111,13 @@ int Fonograf::render_ui() {
     print_ui_header();
 
     while (true) {
+        /* int remaining_frames = duration_as_pcm_frames - FRAMES_READ;
+        remaining_duration = remaining_frames / decoder.outputSampleRate;
+        if (remaining_frames <= 0) {
+            std::cout << "Bye bye :3\n";
+            return 0;
+        } */
+
         if (__kbhit()) {
             int key = __getch();
 

@@ -14,7 +14,11 @@ class Fonograf {
     bool device_inited;
 
     std::string track;
+
+    // Track length (in seconds)
     int duration;
+    ma_uint64 duration_as_pcm_frames;
+    int remaining_duration;
 
     bool paused;
 
