@@ -21,9 +21,11 @@ void Fonograf::print_ui_header() {
     print_centered_line_of_text("Fonograf.");
     ru::resetColor();
 
+    ru::rutil_print("\n");
+
     /* Now playing section */
-    if (track != "") {
-        if (paused) {
+    if (player_state != PlayerState::NO_TRACK_CHOSEN) {
+        if (player_state == PlayerState::PAUSED) {
             ru::setColor(ru::YELLOW);
             ru::rutil_print("Paused: ");
             ru::resetColor();
@@ -36,9 +38,18 @@ void Fonograf::print_ui_header() {
 
             ru::rutil_print(track + "\n");
         }
+
+        ru::setColor(ru::YELLOW);
+        ru::rutil_print("Duration: ");
+        ru::resetColor();
+
+        std::stringstream ss;
+        ss << duration / 60 << " min " << (duration - ((duration / 60) * 60))
+           << " sec\n";
+        ru::rutil_print(ss.str());
     } else {
         ru::setColor(ru::YELLOW);
-        ru::rutil_print("No song chosen.");
+        ru::rutil_print("No track chosen.\n");
         ru::resetColor();
     }
 
@@ -67,8 +78,10 @@ void Fonograf::print_ui_header() {
     ru::rutil_print("Controls: \n");
     ru::resetColor();
 
-    ru::rutil_print("\t 'p' to pause or play\n"
-                    "\t 'c' to choose a song to switch to\n"
+    if (player_state != PlayerState::NO_TRACK_CHOSEN) {
+        ru::rutil_print("\t 'p' to pause or play\n");
+    }
+    ru::rutil_print("\t 'c' to choose a song to switch to\n"
                     "\t 'q' to quit\n");
 }
 
@@ -81,6 +94,20 @@ int Fonograf::render_ui() {
     print_ui_header();
 
     while (true) {
+        /* if (player_state != PlayerState::NO_TRACK_CHOSEN) {
+            std::cout << "duration as pcm frames: " << duration_as_pcm_frames
+                      << "\n";
+            std::cout << "frames read: " << get_frames_read() << "\n";
+            std::cout << "output sample rate: " << decoder.outputSampleRate
+                      << "\n";
+            int remaining_frames = duration_as_pcm_frames / get_frames_read();
+            remaining_duration = remaining_frames / decoder.outputSampleRate;
+            if (remaining_frames <= 0) {
+                ru::rutil_print("Bye bye :3");
+                return 0;
+            }
+        } */
+
         if (kbhit()) {
             int key = getch();
             switch (key) {
@@ -121,13 +148,13 @@ int Fonograf::render_ui() {
                 }
             }
             case 'p': {
-                if (!paused) {
+                if (player_state == PlayerState::PLAYING) {
                     ma_device_stop(&device);
-                } else {
+                    player_state = PlayerState::PAUSED;
+                } else if (player_state == PlayerState::PAUSED) {
                     ma_device_start(&device);
+                    player_state = PlayerState::PLAYING;
                 }
-
-                paused = !paused;
             }
             }
 

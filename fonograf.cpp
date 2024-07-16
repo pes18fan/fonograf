@@ -19,7 +19,6 @@ namespace fs = std::filesystem;
 
 #include <fstream>
 #include <iostream>
-#include <stdexcept>
 
 #ifdef _WIN32
 #include <conio.h>
@@ -39,6 +38,11 @@ void data_callback(ma_device* pDevice, void* pOutput, const void* pInput,
 }
 
 /***** PRIVATE *****/
+
+ma_uint64 Fonograf::get_frames_read() {
+    int fr = FRAMES_READ;
+    return fr;
+}
 
 void Fonograf::cleanup() {
     if (device_inited) {
@@ -71,10 +75,18 @@ void Fonograf::play_track_boilerplate(std::string filepath) {
     }
     device_inited = true;
 
+    if (ma_decoder_get_length_in_pcm_frames(
+            &decoder, &duration_as_pcm_frames) != MA_SUCCESS) {
+        throw std::runtime_error("Failed to get duration of track.");
+    }
+
+    duration = duration_as_pcm_frames / decoder.outputSampleRate;
+    remaining_duration = duration;
+
     if (ma_device_start(&device) != MA_SUCCESS) {
         throw std::runtime_error("Failed to start playback device.");
     }
-    paused = false;
+    player_state = PlayerState::PLAYING;
 }
 
 void Fonograf::fetch_tracks_in_directory() {
@@ -97,13 +109,15 @@ void Fonograf::fetch_tracks_in_directory() {
 /***** PUBLIC *****/
 
 Fonograf::Fonograf()
-    : paused(true), decoder_inited(false), device_inited(false) {
+    : player_state(PlayerState::NO_TRACK_CHOSEN), decoder_inited(false),
+      device_inited(false) {
     track = "";
     fetch_tracks_in_directory();
 }
 
 Fonograf::Fonograf(std::string filepath)
-    : paused(true), decoder_inited(false), device_inited(false) {
+    : player_state(PlayerState::NO_TRACK_CHOSEN), decoder_inited(false),
+      device_inited(false) {
     std::ifstream ifile;
     ifile.open(filepath);
     if (!ifile) {
@@ -111,6 +125,7 @@ Fonograf::Fonograf(std::string filepath)
     }
 
     track = filepath;
+    player_state = PlayerState::PAUSED;
 
     fetch_tracks_in_directory();
 }

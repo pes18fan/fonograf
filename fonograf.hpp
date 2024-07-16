@@ -5,6 +5,12 @@
 #include <string>
 #include <vector>
 
+enum class PlayerState {
+    NO_TRACK_CHOSEN,
+    PLAYING,
+    PAUSED,
+};
+
 class Fonograf {
     /* Miniaudio stuff. */
     ma_decoder decoder;
@@ -23,7 +29,9 @@ class Fonograf {
     ma_uint64 duration_as_pcm_frames;
     int remaining_duration;
 
-    bool paused;
+    ma_uint64 get_frames_read();
+
+    PlayerState player_state;
 
     std::vector<std::string> tracks_in_directory;
 
