@@ -3,6 +3,7 @@
 
 #include "vendor/miniaudio.h"
 #include <string>
+#include <vector>
 
 class Fonograf {
     /* Miniaudio stuff. */
@@ -24,18 +25,27 @@ class Fonograf {
 
     bool paused;
 
-    void cleanup();
-    void die(std::string why);
+    std::vector<std::string> tracks_in_directory;
 
+    void cleanup();
+
+    void fetch_tracks_in_directory();
+
+    void play_track_boilerplate(std::string filepath);
+
+    /* UI */
+    void print_centered_line_of_text(std::string text);
     void print_ui_header();
 
   public:
-    Fonograf(std::string t);
+    Fonograf();
+    Fonograf(std::string filepath);
     ~Fonograf();
 
     int render_ui();
 
     void play_track();
+    void play_track(std::string track);
 };
 
 #endif

@@ -1,8 +1,8 @@
 @echo off
 setlocal enabledelayedexpansion
 
-clang++ -o fonograf.exe main.cpp fonograf.cpp
-
+clang++ -ladvapi32 -o fonograf.exe main.cpp fonograf.cpp ui.cpp
+ 
 if %errorlevel% neq 0 (
     echo Failed to compile.
     exit /b 1

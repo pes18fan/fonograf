@@ -1,15 +1,29 @@
-#define BOILER_IMPL
-#include "vendor/boiler.h"
-
 #define MINIAUDIO_IMPLEMENTATION
 #include "vendor/miniaudio.h"
 
 #include "fonograf.hpp"
 
+/* I needed to do this because for whatever reason because the non-experimental
+   filesystem header didn't have std::filesystem with it, but the experimental
+   one did */
+#if __has_include(<experimental/filesystem>)
+#define _SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING
+#include <experimental/filesystem>
+namespace fs = std::experimental::filesystem;
+#elif __has_include(<filesystem>)
+#include <filesystem>
+namespace fs = std::filesystem;
+#else
+#error "No <filesystem> header present."
+#endif
+
 #include <fstream>
 #include <iostream>
-#include <sstream>
 #include <stdexcept>
+
+#ifdef _WIN32
+#include <conio.h>
+#endif
 
 ma_uint64 FRAMES_READ = -1;
 
@@ -27,50 +41,21 @@ void data_callback(ma_device* pDevice, void* pOutput, const void* pInput,
 /***** PRIVATE *****/
 
 void Fonograf::cleanup() {
-    if (device_inited)
+    if (device_inited) {
         ma_device_uninit(&device);
-    if (decoder_inited)
+        device_inited = false;
+    }
+
+    if (decoder_inited) {
         ma_decoder_uninit(&decoder);
-}
-
-void Fonograf::print_ui_header() {
-    GREEN();
-    center_text("Fonograf.\n\n");
-    RESET();
-
-    std::ostringstream oss;
-    if (paused) {
-        oss << "Paused: " << track << "\n";
-    } else {
-        oss << "Now playing: " << track << "\n";
+        decoder_inited = false;
     }
-    center_text(oss.str().c_str());
-
-    center_text("Press p to pause or play, and q to quit.\n");
 }
 
-/***** PUBLIC *****/
-
-Fonograf::Fonograf(std::string filepath)
-    : paused(true), decoder_inited(false), device_inited(false) {
-    std::ifstream ifile;
-    ifile.open(filepath);
-    if (!ifile) {
-        throw std::invalid_argument("File " + filepath + " doesn't exist.");
-    }
-
-    track = filepath;
-}
-
-Fonograf::~Fonograf() { cleanup(); }
-
-void Fonograf::play_track() {
-    // Deallocate any previous allocations
-    cleanup();
-
-    ma_result result = ma_decoder_init_file(track.c_str(), NULL, &decoder);
+void Fonograf::play_track_boilerplate(std::string filepath) {
+    ma_result result = ma_decoder_init_file(filepath.c_str(), NULL, &decoder);
     if (result != MA_SUCCESS)
-        throw std::runtime_error("Failed to open file " + track + ".");
+        throw std::runtime_error("Failed to open file " + filepath + ".");
     decoder_inited = true;
 
     ma_device_config device_config =
@@ -92,29 +77,59 @@ void Fonograf::play_track() {
     paused = false;
 }
 
-int Fonograf::render_ui() {
-    clrscr();
-    print_ui_header();
+void Fonograf::fetch_tracks_in_directory() {
+    std::string path = ".";
 
-    while (true) {
-        if (__kbhit()) {
-            int key = __getch();
-            switch (key) {
-            case 'q':
-                return 0;
-            case 'p': {
-                if (!paused) {
-                    ma_device_stop(&device);
-                } else {
-                    ma_device_start(&device);
-                }
-
-                paused = !paused;
+    try {
+        for (const auto& entry : fs::directory_iterator(path)) {
+            if (entry.path().extension() == ".mp3" ||
+                entry.path().extension() == ".wav" ||
+                entry.path().extension() == ".m4a" ||
+                entry.path().extension() == ".flac") {
+                tracks_in_directory.push_back(entry.path().string());
             }
-            }
-
-            clrscr();
-            print_ui_header();
         }
+    } catch (const fs::filesystem_error& e) {
+        throw;
     }
+}
+
+/***** PUBLIC *****/
+
+Fonograf::Fonograf()
+    : paused(true), decoder_inited(false), device_inited(false) {
+    track = "";
+    fetch_tracks_in_directory();
+}
+
+Fonograf::Fonograf(std::string filepath)
+    : paused(true), decoder_inited(false), device_inited(false) {
+    std::ifstream ifile;
+    ifile.open(filepath);
+    if (!ifile) {
+        throw std::invalid_argument("File " + filepath + " doesn't exist.");
+    }
+
+    track = filepath;
+
+    fetch_tracks_in_directory();
+}
+
+Fonograf::~Fonograf() { cleanup(); }
+
+void Fonograf::play_track() {
+    if (track == "") {
+        throw std::invalid_argument("No track path set.");
+    }
+
+    // Deallocate any previous allocations
+    cleanup();
+    play_track_boilerplate(track);
+}
+
+void Fonograf::play_track(std::string filepath) {
+    // Deallocate any previous allocations
+    cleanup();
+    play_track_boilerplate(filepath);
+    track = filepath;
 }

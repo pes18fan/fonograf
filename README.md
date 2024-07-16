@@ -2,8 +2,8 @@
 
 Basic music player in C++.
 
-Uses the [miniaudio](https://github.com/mackron/miniaudio) library for audio
-decoding.
+Uses [miniaudio](https://github.com/mackron/miniaudio) for audio decoding, and
+[rogueutil](https://github.com/sakhmatd/rogueutil) for the terminal-based UI.
 
 # building
 
