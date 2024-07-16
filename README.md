@@ -9,7 +9,7 @@ decoding.
 
 Requirements:
 
-- A C compiler, g++ on Linux/macOS and cl.exe on Windows. The program is likely to compile with other compilers too like clang++ or mingw, however the makefile and `build.bat` make use of g++ and cl.
+- A C++ compiler. It is recommended to use clang++.
 
 Clone the repo:
 
@@ -17,14 +17,14 @@ Clone the repo:
 git clone https://github.com/pes18fan/fonograf.git
 ```
 
+## compiling
+
 If on Linux or macOS:
 
 ```bash
 make # Build
 ```
 
-If on Windows, run `build.bat`. Make sure `cl.exe` is in your path, you may have
-to run the build file on a Visual Studio command prompt for `cl.exe` to be 
-available.
+If on Windows, run `build.bat`. Make sure `clang++.exe` is in your path.
 
 Enjoy!

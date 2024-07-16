@@ -1,4 +1,7 @@
-#include "fonograf.h"
+#define BOILER_IMPL
+#include "vendor/boiler.h"
+
+#include "fonograf.hpp"
 
 #include <fstream>
 #include <iostream>
@@ -38,18 +41,12 @@ void Fonograf::print_ui_header() {
     RESET();
 
     std::ostringstream oss;
-    oss << "Now playing: " << track << "\n";
+    if (paused) {
+        oss << "Paused: " << track << "\n";
+    } else {
+        oss << "Now playing: " << track << "\n";
+    }
     center_text(oss.str().c_str());
-
-    std::ostringstream pss;
-    pss << "Duration: " << duration / 60 << " min "
-        << (duration - ((duration / 60) * 60)) << " sec\n";
-    center_text(pss.str().c_str());
-
-    std::ostringstream qss;
-    qss << "Time left: " << remaining_duration / 60 << " min "
-        << (remaining_duration - ((remaining_duration / 60) * 60)) << " sec\n";
-    center_text(qss.str().c_str());
 
     center_text("Press p to pause or play, and q to quit.\n");
 }
@@ -57,7 +54,7 @@ void Fonograf::print_ui_header() {
 /***** PUBLIC *****/
 
 Fonograf::Fonograf(std::string t)
-    : paused(false), decoder_inited(false), device_inited(false) {
+    : paused(true), decoder_inited(false), device_inited(false) {
     std::ifstream ifile;
     ifile.open(t);
     if (!ifile) {
@@ -75,7 +72,7 @@ void Fonograf::play_track() {
 
     ma_result result = ma_decoder_init_file(track.c_str(), NULL, &decoder);
     if (result != MA_SUCCESS)
-        die("Failed to open file " + track);
+        die("Failed to open file " + track + ".");
     decoder_inited = true;
 
     ma_device_config device_config =
@@ -87,22 +84,14 @@ void Fonograf::play_track() {
     device_config.pUserData = &decoder;
 
     if (ma_device_init(NULL, &device_config, &device) != MA_SUCCESS) {
-        die("Failed to open playback device");
+        die("Failed to open playback device.");
     }
     device_inited = true;
 
     if (ma_device_start(&device) != MA_SUCCESS) {
-        die("Failed to start playback device");
+        die("Failed to start playback device.");
     }
-
-    result =
-        ma_decoder_get_length_in_pcm_frames(&decoder, &duration_as_pcm_frames);
-    if (result != MA_SUCCESS) {
-        die("Failed to get duration of track");
-    }
-
-    duration = duration_as_pcm_frames / decoder.outputSampleRate;
-    remaining_duration = duration;
+    paused = false;
 }
 
 int Fonograf::render_ui() {
@@ -110,18 +99,8 @@ int Fonograf::render_ui() {
     print_ui_header();
 
     while (true) {
-        /* int remaining_frames = duration_as_pcm_frames - FRAMES_READ;
-        remaining_duration = remaining_frames / decoder.outputSampleRate;
-        if (remaining_frames <= 0) {
-            std::cout << "Bye bye :3\n";
-            return 0;
-        } */
-
         if (__kbhit()) {
             int key = __getch();
-
-            clrscr();
-            print_ui_header();
             switch (key) {
             case 'q':
                 return 0;
@@ -135,18 +114,9 @@ int Fonograf::render_ui() {
                 paused = !paused;
             }
             }
+
+            clrscr();
+            print_ui_header();
         }
     }
-}
-
-int main(int argc, char** argv) {
-    if (argc != 2) {
-        std::cerr << "Usage: fonograf <filename>\n";
-        return 1;
-    }
-
-    Fonograf f(argv[1]);
-    f.play_track();
-
-    return f.render_ui();
 }

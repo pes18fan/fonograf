@@ -1,7 +1,7 @@
 @echo off
 setlocal enabledelayedexpansion
 
-cl.exe /Fefonograf fonograf.cpp
+clang++ -o fonograf.exe main.cpp fonograf.cpp
 
 if %errorlevel% neq 0 (
     echo Failed to compile.
