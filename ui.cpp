@@ -1,6 +1,5 @@
 #include "fonograf.hpp"
 #include "vendor/rogueutil.h"
-#include <stdexcept>
 
 namespace ru = rogueutil;
 
