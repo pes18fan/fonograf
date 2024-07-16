@@ -1,7 +1,6 @@
 #ifndef fonograf_fonograf_hpp
 #define fonograf_fonograf_hpp
 
-#define MINIAUDIO_IMPLEMENTATION
 #include "vendor/miniaudio.h"
 #include <string>
 

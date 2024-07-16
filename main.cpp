@@ -8,8 +8,13 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    Fonograf f(argv[1]);
-    f.play_track();
+    try {
+        Fonograf f(argv[1]);
+        f.play_track();
 
-    return f.render_ui();
+        return f.render_ui();
+    } catch (std::exception& e) {
+        std::cerr << "Error: " << e.what() << "\n";
+        return 1;
+    }
 }

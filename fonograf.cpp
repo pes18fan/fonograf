@@ -1,11 +1,15 @@
 #define BOILER_IMPL
 #include "vendor/boiler.h"
 
+#define MINIAUDIO_IMPLEMENTATION
+#include "vendor/miniaudio.h"
+
 #include "fonograf.hpp"
 
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 
 ma_uint64 FRAMES_READ = -1;
 
@@ -29,12 +33,6 @@ void Fonograf::cleanup() {
         ma_decoder_uninit(&decoder);
 }
 
-void Fonograf::die(std::string why) {
-    std::cerr << why << "\n";
-    cleanup();
-    exit(1);
-}
-
 void Fonograf::print_ui_header() {
     GREEN();
     center_text("Fonograf.\n\n");
@@ -53,15 +51,15 @@ void Fonograf::print_ui_header() {
 
 /***** PUBLIC *****/
 
-Fonograf::Fonograf(std::string t)
+Fonograf::Fonograf(std::string filepath)
     : paused(true), decoder_inited(false), device_inited(false) {
     std::ifstream ifile;
-    ifile.open(t);
+    ifile.open(filepath);
     if (!ifile) {
-        die("File " + t + " doesn't exist.");
+        throw std::invalid_argument("File " + filepath + " doesn't exist.");
     }
 
-    track = t;
+    track = filepath;
 }
 
 Fonograf::~Fonograf() { cleanup(); }
@@ -72,7 +70,7 @@ void Fonograf::play_track() {
 
     ma_result result = ma_decoder_init_file(track.c_str(), NULL, &decoder);
     if (result != MA_SUCCESS)
-        die("Failed to open file " + track + ".");
+        throw std::runtime_error("Failed to open file " + track + ".");
     decoder_inited = true;
 
     ma_device_config device_config =
@@ -84,12 +82,12 @@ void Fonograf::play_track() {
     device_config.pUserData = &decoder;
 
     if (ma_device_init(NULL, &device_config, &device) != MA_SUCCESS) {
-        die("Failed to open playback device.");
+        throw std::runtime_error("Failed to open playback device.");
     }
     device_inited = true;
 
     if (ma_device_start(&device) != MA_SUCCESS) {
-        die("Failed to start playback device.");
+        throw std::runtime_error("Failed to start playback device.");
     }
     paused = false;
 }
