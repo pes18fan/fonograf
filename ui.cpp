@@ -31,13 +31,13 @@ void Fonograf::print_ui_header() {
             ru::rutil_print("Paused: ");
             ru::resetColor();
 
-            ru::rutil_print(track + "\n");
+            ru::rutil_print(current_track->filepath + "\n");
         } else {
             ru::setColor(ru::YELLOW);
             ru::rutil_print("Now playing: ");
             ru::resetColor();
 
-            ru::rutil_print(track + "\n");
+            ru::rutil_print(current_track->filepath + "\n");
         }
 
         ru::setColor(ru::YELLOW);
@@ -49,15 +49,21 @@ void Fonograf::print_ui_header() {
            << " sec\n";
         ru::rutil_print(ss.str());
 
-        ru::setColor(ru::YELLOW);
-        ru::rutil_print("Remaining: ");
-        ru::resetColor();
+        if (remaining_duration > 0) {
+            ru::setColor(ru::YELLOW);
+            ru::rutil_print("Remaining: ");
+            ru::resetColor();
 
-        std::stringstream ts;
-        ts << remaining_duration / 60 << " min "
-           << (remaining_duration - ((remaining_duration / 60) * 60))
-           << " sec\n";
-        ru::rutil_print(ts.str());
+            std::stringstream ts;
+            ts << remaining_duration / 60 << " min "
+               << (remaining_duration - ((remaining_duration / 60) * 60))
+               << " sec\n";
+            ru::rutil_print(ts.str());
+        } else {
+            ru::setColor(ru::YELLOW);
+            ru::rutil_print("Track has ended.\n");
+            ru::resetColor();
+        }
     } else {
         ru::setColor(ru::YELLOW);
         ru::rutil_print("No track chosen.\n");
@@ -73,11 +79,11 @@ void Fonograf::print_ui_header() {
 
     int i = 1;
     for (const auto& track : tracks_in_directory) {
-        ru::setColor(rogueutil::MAGENTA);
+        ru::setColor(ru::MAGENTA);
         ru::rutil_print("\t [" + std::to_string(i) + "] ");
         ru::resetColor();
 
-        ru::rutil_print(track + "\n");
+        ru::rutil_print(track.filepath + "\n");
         i++;
     }
 
@@ -118,9 +124,27 @@ int Fonograf::render_ui() {
 
             int remaining_frames = duration_as_pcm_frames - cursor;
             remaining_duration = remaining_frames / decoder.outputSampleRate;
+
+            /* If track ended, play another that hasn't yet been played. */
             if (remaining_frames <= 0) {
-                ru::rutil_print("Bye bye :3");
-                return 0;
+                cleanup();
+
+                int played_num = 0;
+                for (auto& track : tracks_in_directory) {
+                    if (!track.played) {
+                        play_track(track);
+                        break;
+                    }
+                    played_num++;
+                }
+
+                /* If all tracks have been played already, reset their "played"
+                   status */
+                if (played_num == tracks_in_directory.size()) {
+                    for (auto& track : tracks_in_directory) {
+                        track.played = false;
+                    }
+                }
             }
         }
 
@@ -177,7 +201,7 @@ int Fonograf::render_ui() {
             continue;
         }
 
-        std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
         ru::cls();
         print_ui_header();
