@@ -46,3 +46,11 @@ make # Build
 If on Windows, run `build.bat`. Make sure `clang++.exe` is in your path.
 
 Enjoy!
+
+# known issues
+
+- UI flickering. This is due to the UI redrawing every half second to update the remaining duration of the playing track.
+- Delayed input handling. The reason is similar to above, the UI's infinite loop sleeps for half a second each iteration to avoid overloading the CPU.
+
+The solution to both these issues is multithreading, but that's a complex task
+with plenty of pitfalls and I do not wish to get into that for now.
