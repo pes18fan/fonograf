@@ -13,14 +13,10 @@ Just invoke it on the terminal:
 fonograf
 ```
 
-It will list out the music files in the current directory. Currently, `mp3`,
-`wav` and `flac` files are supported.
-
-You can play a song right away by passing the path to it:
-
-```bash
-fonograf song.mp3
-```
+It will list out the music files in the current directory, and start playing the
+one at the top (the one which is alphabetically first). Currently, `mp3`, `wav` 
+and `flac` files are supported. A few controls, specifically pause, change song
+and quit are provided, run by pressing the "p", "c" and "q" keys respectively.
 
 # building
 
