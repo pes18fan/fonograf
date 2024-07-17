@@ -137,14 +137,6 @@ int Fonograf::render_ui() {
                     }
                     played_num++;
                 }
-
-                /* If all tracks have been played already, reset their "played"
-                   status */
-                if (played_num == tracks_in_directory.size()) {
-                    for (auto& track : tracks_in_directory) {
-                        track.played = false;
-                    }
-                }
             }
         }
 
