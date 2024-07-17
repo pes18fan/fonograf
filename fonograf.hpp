@@ -12,6 +12,13 @@ enum class PlayerState {
     PAUSED,
 };
 
+struct Track {
+    std::string filepath;
+    bool played;
+
+    Track(std::string p) : filepath(p), played(false) {}
+};
+
 class Fonograf {
     /* Miniaudio stuff. */
     ma_decoder decoder;
@@ -23,7 +30,7 @@ class Fonograf {
     /* Whether the ma_device is initialized. */
     bool device_inited;
 
-    std::string track;
+    Track* current_track;
 
     // Track length (in seconds)
     int duration;
@@ -32,13 +39,13 @@ class Fonograf {
 
     PlayerState player_state;
 
-    std::vector<std::string> tracks_in_directory;
+    std::vector<Track> tracks_in_directory;
 
     void cleanup();
 
     void fetch_tracks_in_directory();
 
-    void play_track_boilerplate(std::string filepath);
+    void play_track_boilerplate(Track& track);
 
     /* UI */
     void print_centered_line_of_text(std::string text);
@@ -46,13 +53,12 @@ class Fonograf {
 
   public:
     Fonograf();
-    Fonograf(std::string filepath);
     ~Fonograf();
 
     int render_ui();
 
     void play_track();
-    void play_track(std::string track);
+    void play_track(Track& track);
 };
 
 #endif

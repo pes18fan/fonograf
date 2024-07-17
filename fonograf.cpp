@@ -51,7 +51,9 @@ void Fonograf::cleanup() {
     }
 }
 
-void Fonograf::play_track_boilerplate(std::string filepath) {
+void Fonograf::play_track_boilerplate(Track& track) {
+    std::string& filepath = track.filepath;
+
     ma_result result = ma_decoder_init_file(filepath.c_str(), NULL, &decoder);
     if (result != MA_SUCCESS)
         throw std::runtime_error("Failed to open file " + filepath + ".");
@@ -81,7 +83,9 @@ void Fonograf::play_track_boilerplate(std::string filepath) {
     if (ma_device_start(&device) != MA_SUCCESS) {
         throw std::runtime_error("Failed to start playback device.");
     }
+
     player_state = PlayerState::PLAYING;
+    track.played = true;
 }
 
 void Fonograf::fetch_tracks_in_directory() {
@@ -92,7 +96,7 @@ void Fonograf::fetch_tracks_in_directory() {
             if (entry.path().extension() == ".mp3" ||
                 entry.path().extension() == ".wav" ||
                 entry.path().extension() == ".flac") {
-                tracks_in_directory.push_back(entry.path().string());
+                tracks_in_directory.push_back(Track(entry.path().string()));
             }
         }
     } catch (const fs::filesystem_error& e) {
@@ -105,40 +109,25 @@ void Fonograf::fetch_tracks_in_directory() {
 Fonograf::Fonograf()
     : player_state(PlayerState::NO_TRACK_CHOSEN), decoder_inited(false),
       device_inited(false) {
-    track = "";
     fetch_tracks_in_directory();
-}
-
-Fonograf::Fonograf(std::string filepath)
-    : player_state(PlayerState::NO_TRACK_CHOSEN), decoder_inited(false),
-      device_inited(false) {
-    std::ifstream ifile;
-    ifile.open(filepath);
-    if (!ifile) {
-        throw std::invalid_argument("File " + filepath + " doesn't exist.");
-    }
-
-    track = filepath;
-    player_state = PlayerState::PAUSED;
-
-    fetch_tracks_in_directory();
+    current_track = &tracks_in_directory[0];
 }
 
 Fonograf::~Fonograf() { cleanup(); }
 
 void Fonograf::play_track() {
-    if (track == "") {
-        throw std::invalid_argument("No track path set.");
+    if (!current_track) {
+        throw std::runtime_error("Current track not set.");
     }
 
     // Deallocate any previous allocations
     cleanup();
-    play_track_boilerplate(track);
+    play_track_boilerplate(*current_track);
 }
 
-void Fonograf::play_track(std::string filepath) {
+void Fonograf::play_track(Track& track) {
     // Deallocate any previous allocations
     cleanup();
-    play_track_boilerplate(filepath);
-    track = filepath;
+    play_track_boilerplate(track);
+    current_track = &track;
 }
