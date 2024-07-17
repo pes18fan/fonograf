@@ -1,5 +1,6 @@
 #include "fonograf.hpp"
 #include "vendor/rogueutil.h"
+#include <thread>
 
 namespace ru = rogueutil;
 
@@ -7,7 +8,7 @@ namespace ru = rogueutil;
 
 void Fonograf::print_centered_line_of_text(std::string text) {
     int cols = ru::tcols();
-    int center_start = (cols / 2) - text.size();
+    int center_start = (cols / 2) - (text.size() / 2);
 
     for (int i = 0; i < center_start; i++) {
         std::cout << " ";
@@ -47,6 +48,16 @@ void Fonograf::print_ui_header() {
         ss << duration / 60 << " min " << (duration - ((duration / 60) * 60))
            << " sec\n";
         ru::rutil_print(ss.str());
+
+        ru::setColor(ru::YELLOW);
+        ru::rutil_print("Remaining: ");
+        ru::resetColor();
+
+        std::stringstream ts;
+        ts << remaining_duration / 60 << " min "
+           << (remaining_duration - ((remaining_duration / 60) * 60))
+           << " sec\n";
+        ru::rutil_print(ts.str());
     } else {
         ru::setColor(ru::YELLOW);
         ru::rutil_print("No track chosen.\n");
@@ -56,10 +67,13 @@ void Fonograf::print_ui_header() {
     ru::rutil_print("\n");
 
     /* Tracks list */
+    ru::setColor(ru::YELLOW);
     ru::rutil_print("Tracks found: \n");
+    ru::resetColor();
+
     int i = 1;
     for (const auto& track : tracks_in_directory) {
-        ru::setColor(ru::YELLOW);
+        ru::setColor(rogueutil::MAGENTA);
         ru::rutil_print("\t [" + std::to_string(i) + "] ");
         ru::resetColor();
 
@@ -94,19 +108,21 @@ int Fonograf::render_ui() {
     print_ui_header();
 
     while (true) {
-        /* if (player_state != PlayerState::NO_TRACK_CHOSEN) {
-            std::cout << "duration as pcm frames: " << duration_as_pcm_frames
-                      << "\n";
-            std::cout << "frames read: " << get_frames_read() << "\n";
-            std::cout << "output sample rate: " << decoder.outputSampleRate
-                      << "\n";
-            int remaining_frames = duration_as_pcm_frames / get_frames_read();
+        if (player_state != PlayerState::NO_TRACK_CHOSEN) {
+            ma_uint64 cursor;
+            if (ma_decoder_get_cursor_in_pcm_frames(&decoder, &cursor) !=
+                MA_SUCCESS) {
+                throw std::runtime_error(
+                    "Failed to retrieve current cursor position");
+            }
+
+            int remaining_frames = duration_as_pcm_frames - cursor;
             remaining_duration = remaining_frames / decoder.outputSampleRate;
             if (remaining_frames <= 0) {
                 ru::rutil_print("Bye bye :3");
                 return 0;
             }
-        } */
+        }
 
         if (kbhit()) {
             int key = getch();
@@ -158,8 +174,12 @@ int Fonograf::render_ui() {
             }
             }
 
-            ru::cls();
-            print_ui_header();
+            continue;
         }
+
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+
+        ru::cls();
+        print_ui_header();
     }
 }

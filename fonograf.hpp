@@ -7,6 +7,7 @@
 
 enum class PlayerState {
     NO_TRACK_CHOSEN,
+    TRACK_LOADING,
     PLAYING,
     PAUSED,
 };
@@ -28,8 +29,6 @@ class Fonograf {
     int duration;
     ma_uint64 duration_as_pcm_frames;
     int remaining_duration;
-
-    ma_uint64 get_frames_read();
 
     PlayerState player_state;
 

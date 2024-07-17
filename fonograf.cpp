@@ -39,11 +39,6 @@ void data_callback(ma_device* pDevice, void* pOutput, const void* pInput,
 
 /***** PRIVATE *****/
 
-ma_uint64 Fonograf::get_frames_read() {
-    int fr = FRAMES_READ;
-    return fr;
-}
-
 void Fonograf::cleanup() {
     if (device_inited) {
         ma_device_uninit(&device);
@@ -96,7 +91,6 @@ void Fonograf::fetch_tracks_in_directory() {
         for (const auto& entry : fs::directory_iterator(path)) {
             if (entry.path().extension() == ".mp3" ||
                 entry.path().extension() == ".wav" ||
-                entry.path().extension() == ".m4a" ||
                 entry.path().extension() == ".flac") {
                 tracks_in_directory.push_back(entry.path().string());
             }

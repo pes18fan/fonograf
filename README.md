@@ -13,7 +13,7 @@ Just invoke it on the terminal:
 fonograf
 ```
 
-It will list out the music files in the current directory. Currently, `m4a`, `mp3`,
+It will list out the music files in the current directory. Currently, `mp3`,
 `wav` and `flac` files are supported.
 
 You can play a song right away by passing the path to it:
