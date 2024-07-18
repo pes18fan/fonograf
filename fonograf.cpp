@@ -3,22 +3,16 @@
 
 #include "fonograf.hpp"
 
-/* I needed to do this because for whatever reason because the non-experimental
-   filesystem header didn't have std::filesystem with it, but the experimental
-   one did */
-#if __has_include(<experimental/filesystem>)
+#if __has_include(<filesystem>)
+#include <filesystem>
+namespace fs = std::filesystem;
+#elif __has_include(<experimental/filesystem>)
 #define _SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING
 #include <experimental/filesystem>
 namespace fs = std::experimental::filesystem;
-#elif __has_include(<filesystem>)
-#include <filesystem>
-namespace fs = std::filesystem;
 #else
 #error "No <filesystem> header present."
 #endif
-
-#include <fstream>
-#include <iostream>
 
 #ifdef _WIN32
 #include <conio.h>
