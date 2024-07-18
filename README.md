@@ -5,6 +5,8 @@ Terminal-based music player in C++.
 Uses [miniaudio](https://github.com/mackron/miniaudio) for audio decoding, and
 [rogueutil](https://github.com/sakhmatd/rogueutil) for the terminal-based UI.
 
+A college project.
+
 # usage
 
 Just invoke it on the terminal:
