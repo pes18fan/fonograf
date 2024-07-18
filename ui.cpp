@@ -4,8 +4,6 @@
 
 namespace ru = rogueutil;
 
-/*** PRIVATE ***/
-
 void Fonograf::print_centered_line_of_text(std::string text) {
     int cols = ru::tcols();
     int center_start = (cols / 2) - (text.size() / 2);
@@ -105,13 +103,17 @@ void Fonograf::print_ui_header() {
                     "\t 'q' to quit\n");
 }
 
+void Fonograf::redraw() {
+    ru::cls();
+    print_ui_header();
+}
+
 /*** PUBLIC ***/
 
 int Fonograf::render_ui() {
     ru::saveDefaultColor();
 
-    ru::cls();
-    print_ui_header();
+    redraw();
 
     while (true) {
         if (player_state != PlayerState::NO_TRACK_CHOSEN) {
@@ -174,8 +176,7 @@ int Fonograf::render_ui() {
                         "Invalid option! Press any key to continue.");
                     getch();
 
-                    ru::cls();
-                    print_ui_header();
+                    redraw();
                     goto song_picker;
                 }
             }
@@ -195,7 +196,6 @@ int Fonograf::render_ui() {
 
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
-        ru::cls();
-        print_ui_header();
+        redraw();
     }
 }
