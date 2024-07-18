@@ -52,3 +52,12 @@ Enjoy!
 
 The solution to both these issues is multithreading, but that's a complex task
 with plenty of pitfalls and I do not wish to get into that for now.
+
+# license
+
+This software is in its entirity licensed under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0).
+
+Additionally, it uses these following libraries under the following licenses:
+
+- [miniaudio](https://github.com/mackron/miniaudio), public domain under the [Unlicense](https://unlicense.org)
+- [rogueutil](https://github.com/sakhmatd/rogueutil), under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0).
