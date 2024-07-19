@@ -24,18 +24,26 @@ and quit are provided, run by pressing the "p", "c" and "q" keys respectively.
 
 You'll need a C++ compiler. While most compilers are likely to work, this project
 is built with clang and all the build scripts are for clang, so it is recommended
-to use it. On Linux, install it with your package manager, and on Windows, use
-[scoop](https://scoop.sh) to install the `llvm` package which provides `clang++`.
+to use it.
 
-Clone the repo:
+On Linux and macOS, install it with your package manager. On Windows, the easiest
+way is to use [scoop](https://scoop.sh) to install LLVM by installing the `llvm` 
+package which provides `clang++`.
+
+```bash
+scoop install llvm
+```
+
+Note that you'll also require the Visual Studio build tools and by extension 
+Visual Studio, since LLVM doesn't provide a standard library.
+
+Now clone this repo:
 
 ```bash
 git clone https://github.com/pes18fan/fonograf.git
 ```
 
-## compiling
-
-If on Linux or macOS:
+And to compile, if on Linux or macOS:
 
 ```bash
 make # Build
