@@ -1,3 +1,7 @@
+#ifndef _WIN32
+#include <pthread.h>
+#endif
+
 #define MINIAUDIO_IMPLEMENTATION
 #include "vendor/miniaudio.h"
 
