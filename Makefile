@@ -16,7 +16,7 @@ $(ROGUEUTIL_HEADER): | $(VENDOR_DIR)
 	curl -o $(ROGUEUTIL_HEADER) $(ROGUEUTIL_URL)
 
 all: main.cpp fonograf.cpp ui.cpp $(MINIAUDIO_HEADER) $(ROGUEUTIL_HEADER)
-	clang++ -std=c++17 -ladvapi32 -o fonograf main.cpp fonograf.cpp ui.cpp
+	clang++ -std=c++17 -lpthread -lm -ldl -o fonograf main.cpp fonograf.cpp ui.cpp
 
 .PHONY: clean
 clean:
