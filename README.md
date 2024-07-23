@@ -26,7 +26,12 @@ You'll need a C++ compiler. While most compilers are likely to work, this projec
 is built with clang and all the build scripts are for clang, so it is recommended
 to use it.
 
-On Linux and macOS, install it with your package manager. On Windows, the easiest
+You'll also need [curl](https://curl.se) to download the libraries. It is likely 
+to be preinstalled on your computer, unless you're on an older Windows version 
+(before Windows 10 version 1803) or a lighter Linux distro, in which case you'll 
+have to install it manually.
+
+On Linux and macOS, install clang with your package manager. On Windows, the easiest
 way is to use [scoop](https://scoop.sh) to install LLVM by installing the `llvm` 
 package which provides `clang++`.
 
@@ -46,10 +51,11 @@ git clone https://github.com/pes18fan/fonograf.git
 And to compile, if on Linux or macOS:
 
 ```bash
-make # Build
+make
 ```
 
-If on Windows, run `build.bat`. Make sure `clang++.exe` is in your path.
+If on Windows, run `build.bat`. Make sure `clang++.exe` and `curl.exe` are in 
+your path.
 
 Enjoy!
 
